@@ -17,17 +17,55 @@ router.get("/list", async (req, res) => {
     }
 });
 
+router.get("/list/:id", async (req, res) => {
+    try{
+        const product = await Product.findById(req.params.id);
+        
+        if(!product)
+            return res.status(404).json({'message': 'Product not found.'});
+        return res.json(product);
+
+    } catch(err){
+        console.log(err);
+        return res.status(500).json({error: 'Internal server error'});
+    }
+});
+
 router.post("/add", multer(multerConfig).single('file'), async (req, res) => {
     
     try{
         const { originalname: image, imageKey, location: imageUrl = "" } = req.file;
+        const { name } = req.body;
 
         const product = await Product.create({
-            name: req.body.name,
+            name,
             image,
             imageKey,
             imageUrl
         });
+
+        return res.json(product);
+
+    } catch(err){
+        return res.status(500).json({error: 'Internal server error'});
+    }    
+});
+
+router.put("/save/:id", multer(multerConfig).single('file'), async (req, res) => {
+    
+    try{
+        if(!req.params.id){
+            return res.status(404).json({error: 'Invalid id param'});
+        }
+        const { originalname: image, imageKey, location: imageUrl = "" } = req.file;
+        const { name } = req.body;
+
+        const product = await Product.findByIdAndUpdate({_id: req.params.id}, {
+            name,
+            image,
+            imageKey,
+            imageUrl
+        }, { new: true });
 
         return res.json(product);
 
