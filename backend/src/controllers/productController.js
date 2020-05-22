@@ -51,21 +51,18 @@ router.post("/add", multer(multerConfig).single('file'), async (req, res) => {
     }    
 });
 
-router.put("/save/:id", multer(multerConfig).single('file'), async (req, res) => {
+router.put("/save/:id", async (req, res) => {
     
     try{
         if(!req.params.id){
             return res.status(404).json({error: 'Invalid id param'});
         }
-        const { originalname: image, imageKey, location: imageUrl = "" } = req.file;
-        const { name } = req.body;
-
-        const product = await Product.findByIdAndUpdate({_id: req.params.id}, {
-            name,
-            image,
-            imageKey,
-            imageUrl
-        }, { new: true });
+            
+        const { name, status } = req.body;
+        
+        const data = {name, status };
+        
+        const product = await Product.findByIdAndUpdate({_id: req.params.id}, data, { new: true });
 
         return res.json(product);
 
