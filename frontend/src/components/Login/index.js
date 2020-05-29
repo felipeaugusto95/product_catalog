@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useContext, useState } from 'react';
 
 import { Button, 
          Form, 
@@ -7,58 +7,69 @@ import { Button,
          Input 
 } from 'reactstrap';
 
+import { useHistory, Link } from 'react-router-dom';
+
 import api from '../../services/api';
-// import { useHistory } from 'react-router-dom';
+import StoreContext from '../Store/context';
 
-class Login extends Component{
+function initialState() {
+    return { email: '', password: '' };
+}
 
-    constructor(props) {
-        super(props);
-        this.state = {email: '', password: ''};
-
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+const Login = () => {
+    const [values, setValues] = useState(initialState);
+    const { setToken } = useContext(StoreContext);
+    const history = useHistory();
+  
+    function onChange(event) {
+      const { value, name } = event.target;
+  
+      setValues({
+        ...values,
+        [name]: value
+      });
     }
+  
+    function onSubmit(event) {
+      event.preventDefault();
+      const formData = {
+          email: values.email,
+          password: values.password
+      }
 
-    handleChange(event) {
-        let {name, value} = event.target;
-        this.setState({[name] : value});
+      api.post('/auth/authenticate', formData)
+      .then(function (response) {
+          if (response.data.token) {
+              setToken(response.data.token);
+              return history.push('/');
+          }
+      })
+      .catch(function (error) {
+          alert(error);
+      });
+
+      setValues(initialState);
     }
-
-    async handleSubmit(event) {
-        //const history =  useHistory();
-        event.preventDefault();
-
-        try{
-            await api.post('/auth/authenticate', {
-                email: this.state.email,
-                password: this.state.password
-            });
-            //return history.push("/");
-        } catch(e){
-            alert(e);
-        }
-    }
-
-    render(){
-        
-        return (
+  
+    return (
         <div className="p-3 my-4 w-100 rounded customized">
-            <h2>Entrar</h2>
-            <Form>
+            <h2>Login</h2>
+            <Form onSubmit={onSubmit}>
                 <FormGroup>
                     <Label for="email">Email</Label>
-                    <Input type="text" className="w-75" name="email" id="email" onChange={this.handleChange}/>
+                    <Input type="text" className="w-75" name="email" id="email" onChange={onChange} value={values.email} />
                 </FormGroup>
                 <FormGroup>
                     <Label for="Senha">Senha</Label>
-                    <Input type="password" className="w-75" name="password" id="password" onChange={this.handleChange}/>
+                    <Input type="password" className="w-75" name="password" id="password" onChange={onChange} value={values.password} />
                 </FormGroup>
-                <Button onClick={this.handleSubmit} type="submit" color="info">Salvar</Button>
+                <Button type="submit" color="info">Entrar</Button>
             </Form>
+            <Link to={'/register'} style={{ textDecoration: 'none' }}>
+                Ainda não tem conta? Registre-se
+            </Link>
         </div>
         )
-    }
-}
+  };
 
 export default Login;

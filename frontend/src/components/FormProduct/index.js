@@ -20,7 +20,7 @@ class FormProduct extends Component{
 
     constructor(props) {
         super(props);
-        this.state = {product: '',file: null};
+        this.state = {product: '',file: null, message: ''};
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -35,9 +35,7 @@ class FormProduct extends Component{
 
     handleSubmit(event) {
         event.preventDefault();
-        this.fileUpload(this.state.file, this.state.product).then((response)=>{
-            console.log(response.data);
-        });
+        this.fileUpload(this.state.file, this.state.product);
     }
 
     fileUpload(file, product){
@@ -49,17 +47,18 @@ class FormProduct extends Component{
         .then(function (response) {
             if(response.status !== 200){
                 alert('Problema ao inserir. Tente novamente!');
-                event.preventDefault();
             }
-            console.log(response.data);
         })
         .catch(function (error) {
             alert(error);
-            event.preventDefault();
         });
+
+        this.setState({message: 'Produto inserido com sucesso!'});
     }
 
     render(){
+
+        const { message } = this.state;
         
         return (
             <div>
@@ -77,6 +76,9 @@ class FormProduct extends Component{
                         </FormGroup>
                         <Button onClick={this.handleSubmit} type="submit" color="info">Salvar</Button>
                     </Form>
+                    {message && (
+                        <div className="alert-success">{message}</div>
+                    )}
                 </div>
             </div>
         )
@@ -87,7 +89,7 @@ class FormEdit extends Component{
 
     constructor(props) {
         super(props);
-        this.state = {product: '', status: 0};
+        this.state = {product: '', status: 0, message: ''};
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -104,20 +106,22 @@ class FormEdit extends Component{
         api.put(`/product/save/${handle}`, {
             name: this.state.product,
             status: this.state.status
-          })
-          .then(function (response) {
+        })
+        .then(function (response) {
             if(response.status !== 200){
-              alert(response);
-              event.preventDefault();
+                alert(response);
             }
-          })
-          .catch(function (error) {
+        })
+        .catch(function (error) {
             alert(error);
-            event.preventDefault();
         });
+
+        this.setState({message: 'Produto atualizado com sucesso!'});
     }
 
     render(){
+
+        const { message } = this.state;
         
         return (
             <div>
@@ -140,6 +144,9 @@ class FormEdit extends Component{
                         </FormGroup>
                         <Button onClick={this.handleSubmit} type="submit" color="info">Salvar</Button>
                     </Form>
+                    {message && (
+                        <div className="alert-success">{message}</div>
+                    )}
                 </div>
             </div>
         
